@@ -33,3 +33,5 @@ go.work
 tags
 
 .env
+
+.data
