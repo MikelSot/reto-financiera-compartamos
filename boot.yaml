@@ -1,0 +1,38 @@
+app:
+  name: "reto-financiera-compartamos"
+  description: "reto api financiera compartamos"
+  version: v1.0.0
+  keywords: ["encora", "compartamos", "golang" ]
+  maintainers: [ "encora" ]
+logger:
+  - name: zap-logger
+    description: "Description of entry"
+    zap:
+      encoding: json
+      encoderConfig:
+        callerKey: library
+        messageKey: title
+event:
+  - name: event-logger
+    encoding: json
+config:
+  - name: default-config
+gin:
+  - name: service-gin
+    port: 8080
+    enabled: true
+    commonService:
+      enabled: true
+      pathPrefix: "common"
+    loggerEntry: zap-logger
+    eventEntry: event-logger
+    middleware:
+      logging:
+        enabled: true
+        ignore:
+          - /
+        loggerEncoding: "json"
+        eventEncoding: "json"
+      meta:
+        enabled: true
+        prefix: "encora"

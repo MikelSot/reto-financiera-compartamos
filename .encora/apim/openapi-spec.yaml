@@ -1,0 +1,1412 @@
+openapi: 3.0.3
+info:
+  title: Documentos Electrónicos
+  description: API para la generación y consulta de documentos electrónicos de sociedades Alicorp y DEX.
+  version: 1.0.0
+  x-audience: internal
+servers:
+  - url: http://cia-adhoc-alicorp-documentoselectronicos.edocs.dev.knative.api-alicorp.com/alicorp/documentos-electronicos
+  - url: http://cia-adhoc-alicorp-documentoselectronicos.edocs.pre.knative.api-alicorp.com/alicorp/documentos-electronicos
+  - url: http://cia-adhoc-alicorp-documentoselectronicos.edocs.prd.knative.api-alicorp.com/alicorp/documentos-electronicos
+paths:
+  /DEX/emision:
+    post:
+      operationId: generarDocumentoElectronicoDEX
+      tags:
+        - DEX
+      summary: Emisión de documento electrónico.
+      description: Permite la generación de documentos electrónicos de las DEX con la entidad recaudadora correspondiente.
+      parameters:
+        - name: Request-Id
+          in: header
+          example: d330baf9440d22fb7bc3ba1b2e841abc
+          description: Identificador único del request utilizado para fines de trazabilidad.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - name: Application-Code
+          in: header
+          example: DEX
+          description: Identificador único de la aplicación consumidora.
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Cuerpo del mensaje para generar documento.
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/OnlineGeneration"
+      responses:
+        '201':
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageWithTrama"
+        400:
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '422':
+          description: UNPROCESSABLE_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntity'
+        '500':
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /S4/emision:
+    post:
+      operationId: generarDocumentoElectronicoS4
+      tags:
+        - S4
+      summary: Emisión de documento electrónico.
+      description: Permite la generación de documentos electrónicos de las S4 con la entidad recaudadora correspondiente.
+      parameters:
+        - name: Request-Id
+          in: header
+          example: d330baf9440d22fb7bc3ba1b2e841abc
+          description: Identificador único del request utilizado para fines de trazabilidad.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - name: Application-Code
+          in: header
+          example: S4
+          description: Identificador único de la aplicación consumidora.
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: Cuerpo del mensaje para generar documento.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnlineGenerationS4"
+      responses:
+        201:
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageWithTrama"
+        400:
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        422:
+          description: UNPROCESSABLE_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntity'
+        500:
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnexpectedError'
+  /estado:
+    get:
+      operationId: consultarEstadoDocumento
+      tags:
+        - Documento Electrónico
+      summary: Consulta estado de un documento.
+      description: Permite consultar el estado de un documento electrónico .
+      parameters:
+        - name: Request-Id
+          in: header
+          example: d330baf9440d22fb7bc3ba1b2e841abc
+          description: Identificador único del request utilizado para fines de trazabilidad.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - name: Application-Code
+          in: header
+          example: DEX
+          description: Identificador único de la aplicación consumidora.
+          schema:
+            type: string
+          required: true
+        - name: numeroNIF
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 20100055237
+          description: Número Identificador Fiscal del emisor (RUC o DNI en el caso de Perú) del documento electrónico.
+        - name: tipoNIF
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - "01"
+              - "03"
+              - "07"
+              - "08"
+              - "09"
+              - "20"
+              - "40"
+          example: "09"
+          description: Tipo de documento NIF (Número Identificador Fiscal) del emisor del documento electrónico.
+        - name: numeroCorrelativo
+          in: query
+          required: true
+          schema:
+            type: string
+          example: TSV1-4
+          description: Numeración, conformada por serie y número correlativo.
+        - name: pais
+          in: query
+          schema:
+            type: string
+          example: PE
+          description: Código del país, según el estándar ISO-3166.
+        - name: sociedad
+          in: query
+          schema:
+            type: string
+          example: 0048
+          description: Código de sociedad.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Message"
+        '400':
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '422':
+          description: UNPROCESSABLE_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntity'
+        '500':
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnexpectedError"
+  /documento/{numeroCorrelativo}:
+    get:
+      operationId: obtenerDocumentoElectronico
+      tags:
+        - Documento Electrónico
+      summary: Obtiene un documento electrónico.
+      description: Permite obtener un documento electrónico (PDF + XML).
+      parameters:
+        - name: Request-Id
+          in: header
+          example: d330baf9440d22fb7bc3ba1b2e841abc
+          description: Identificador único del request utilizado para fines de trazabilidad.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - name: Application-Code
+          in: header
+          example: DEX
+          description: Identificador único de la aplicación consumidora.
+          schema:
+            type: string
+          required: true
+        - name: numeroCorrelativo
+          in: path
+          required: true
+          schema:
+            type: string
+          example: T754-00000364
+          description: Numeración, conformada por serie y número correlativo.
+        - name: numeroNIF
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 20100055237
+          description: Número Identificador Fiscal del emisor (RUC o DNI en el caso de Perú) del documento electrónico.
+        - name: tipoNIF
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - "01"
+              - "03"
+              - "07"
+              - "08"
+              - "09"
+              - "20"
+              - "40"
+          example: "09"
+          description: Tipo de documento NIF (Número Identificador Fiscal) del emisor del documento electrónico.
+        - name: tipoDocumento
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - xml
+              - pdf
+              - pdf64
+          example: pdf64
+        - name: pais
+          in: query
+          schema:
+            type: string
+          example: PE
+          description: Código del país, según el estándar ISO-3166.
+        - name: sociedad
+          in: query
+          schema:
+            type: string
+          example: 0048
+          description: Código de sociedad.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageWithUrl"
+        '400':
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '422':
+          description: UNPROCESSABLE_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntity'
+        '500':
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnexpectedError"
+  /documentos:
+    get:
+      operationId: consultarDocumentosPorEstado
+      tags:
+        - Documento Electrónico
+      summary: Consulta documentos a partir de su estado.
+      description: >-
+        Retorna información de los datos principales de los documentos para un estado
+        determinado para un RUC receptor particular para un rango de fecha.
+      parameters:
+        - name: Request-Id
+          in: header
+          example: d330baf9440d22fb7bc3ba1b2e841abc
+          description: Identificador único del request utilizado para fines de trazabilidad.
+          schema:
+            type: string
+            format: uuid
+          required: true
+        - name: Application-Code
+          in: header
+          example: DEX
+          description: Identificador único de la aplicación consumidora.
+          schema:
+            type: string
+          required: true
+        - name: numeroNIFEmisor
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 20100055237
+          description: Número identificador fiscal de la empresa emisora.
+        - name: numeroNIFReceptor
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 20306841506
+          description: Número identificador fiscal de la empresa receptora.
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 2022-10-13
+          description: Fecha emisión desde.
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 2022-10-18
+          description: Fecha emisión hasta.
+        - name: estado
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 1
+          description: Estado del documento.
+        - name: pais
+          in: query
+          schema:
+            type: string
+          example: PE
+          description: Código del país, según el estándar ISO-3166.
+        - name: sociedad
+          in: query
+          schema:
+            type: string
+          example: 0048
+          description: Código de sociedad.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/MessageMassive"
+        '400':
+          description: BAD_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequest'
+        '422':
+          description: UNPROCESSABLE_ENTITY
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnprocessableEntity'
+        '500':
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UnexpectedError"
+components:
+  schemas:
+    Message:
+      type: object
+      description: Respuesta con información de un documento Eletrónico
+      properties:
+        code:
+          type: number
+          example: 0
+          description: Código de la respuesta.
+        message:
+          type: string
+          example: 3316670
+          description: Mensaje de la respuesta.
+        notes:
+          type: array
+          description: Lista de notas que responde SUNAT.
+          example: [ "4399 - No ha consignado el Numero de Constancia de Inscripcion Vehicular", "4391 - El Numero de Registro MTC del transportista no existe" ]
+          items:
+            format: string
+        docId:
+          type: string
+          example: 15854817
+          description: Id de documento.
+    MessageWithUrl:
+      allOf:
+        - $ref: '#/components/schemas/Message'
+        - type: object
+        - description: Respuesta con información de archivos (xml, pdf, pdf64) de un documento Eletrónico
+        - properties:
+            message:
+              type: string
+              example: http://asp4demos.paperless.com.pe/Facturacion/PDFServlet?id=IegLkk04Xgw
+              description: Trama que se envía a SOVOS.
+    MessageWithTrama:
+      description: Respuesta con detalles de la trama que se envia a Sovos
+      allOf:
+        - $ref: '#/components/schemas/Message'
+        - type: object
+        - description: Respuesta con detalles de la trama que se envia a Sovos
+        - properties:
+            trama:
+              type: string
+              example: \nEN|09|T627-00000001|2022-07-06|20100055237|6|ALICORP S.A.A.|10103028235|6|TOTTUS - HUACHIPA (SECOS) TOTTUS - HUACHIPA (SECOS)||||01|VENTA||413.4|KGM||150132|Cal. Archipielago Mz. B Lote 30A-Urb. La Capitana--Lima-Lurigancho|150118|LOTE. 6 EX FUNDO NIEVERIA--LIMA - LIMA-LURIGANCHO|||\nENEX|2.0|21:30:17|SUNAT_Envio|413.4|KGM||0227|||||||\nCR||01|2022-07-06|6|20100039207|RANSA COMERCIAL S.A. ||00000|||||||||\nIT|SUNAT_Envio_IndicadorVehiculoConductoresTransp\nDE|10|30|BX|ACEIT. PRIMOR PREMIUM 1LT 12BOT@##@351 KG@##@4991.33 PEN@##@X_UNICO|3101013|50151500|||\nDE|20|25|BX|SALSA ROJA DON VITTORIO 200GR.12DPK@##@62.4 KG@##@1000.08 PEN@##@2112300120|3300140|50171800|||\nPE|CodCliente|1000016949\nPE|NumPedido|397683\nPE|NumEntrega|80678540\nPE|NumTranFO|00000000006100371880\nPE|PtoExped|1010\nPE|RefAlmacen| \nPE|RUCRefAlmacen|\nPE|NumReserva|\nPE|PrecAduana|\nPE|PrecLinea|\nPE|CorreoCliente|\nPE|ImpTotal|5991.41 PEN\nPE|Plantilla|GLOC.jasper\n
+              description: Trama que se envía a SOVOS.
+    MessageMassive:
+      type: object
+      description: Información de documentos
+      properties:
+        code:
+          type: number
+          example: 0
+          description: Código de la respuesta.
+        message:
+          type: string
+          example: 20306841506|2022-10-13|TSV1-5|Desconocido|0.00|09|00
+          description: Datos principales de documentos.
+    OnlineGeneration:
+      type: object
+      properties:
+        organizacion:
+          type: object
+          required:
+            - pais
+            - organizacionVenta
+          properties:
+            pais:
+              type: string
+              example: 'PE'
+              description: Código del país, según el estándar ISO-3166.
+            organizacionVenta:
+              type: string
+              example: 'DEX'
+              description: Código de organización de venta.
+        pedido:
+          type: object
+          properties:
+            numeroPedido:
+              type: string
+              example: 0090884754
+              description: Número de Pedido.
+            fechaPedido:
+              type: string
+              example: 2022-10-07
+              description: Fecha de Pedido.
+            numeroVale:
+              type: string
+              example: 007075693
+              description: Número de  vale.
+            numeroManzana:
+              type: string
+              example: 123
+              description: Número de Manzana.
+            codigoVendedor:
+              type: string
+              example: 00005342
+              description: Código  de Vendedor.
+            codigoModulo:
+              type: string
+              example: 016007
+              description: Código  de Módulo.
+            numeroInterno:
+              type: string
+              example: 01253624859
+              description: Número Interno asociado ala cabecera de la Guía de Remisión Electrónica.
+        documentoElectronico:
+          $ref: '#/components/schemas/ElectronicDocument'
+        entrega:
+          $ref: '#/components/schemas/Carrier'
+        items:
+          $ref: '#/components/schemas/Items'
+        tipoRespuesta:
+          type: string
+          example: 1
+          description: Tipo de devolución de respuesta (puede ser del 0 al 7).
+    ElectronicDocument:
+      type: object
+      description: Detalles generales de la Guía de Remisión
+      required:
+        - tipoDocumento
+        - numeroCorrelativo
+        - fechaEmision
+      properties:
+        tipoDocumento:
+          type: string
+          example: 09
+          description: Tipo de Documento.
+        numeroCorrelativo:
+          type: string
+          example: TSV1-4
+          description: Numeración, conformada por serie y número correlativo.
+        fechaEmision:
+          type: string
+          example: 2022-10-13
+          description: Fecha Emisión.
+          format: date
+        documentoRelacionado:
+          type: object
+          required:
+            - numeroDocumento
+            - tipoDocumento
+            - descripcionTipoDocumento
+          properties:
+            tipoDocumento:
+              type: string
+              example:
+              description: Código del tipo de documento de documento Relacionado.
+            numeroDocumento:
+              type: string
+              example:
+              description: Número de documento Relacionado.
+            descripcionTipoDocumento:
+              type: string
+              example:
+              description: Descripción del tipo de documento relacionado.
+            emisor:
+              type: object
+              required:
+                - tipoDocumento
+                - numeroDocumento
+              properties:
+                tipoDocumento:
+                  type: string
+                  example: 6
+                  description: Tipo de documento de identidad del emisor del documento relacionado.
+                numeroDocumento:
+                  type: string
+                  example: 20306841506
+                  description: Número de RUC del emisor del documento relacionado.
+        remitente:
+          type: object
+          required:
+            - tipoDocumento
+            - numeroDocumento
+            - nombre
+          properties:
+            tipoDocumento:
+              type: string
+              example: 6
+              description: Tipo de Documento de identidad del Remitente
+            numeroDocumento:
+              type: string
+              example: 20100055237
+              description: Número de documento de Identidad del Remitente
+            nombre:
+              type: string
+              example: ALICORP S.A.A.
+              description: Apellidos y nombres, denominación o razón social del remitente
+        destinatario:
+          type: object
+          required:
+            - tipoDocumento
+            - numeroDocumento
+            - nombre
+          properties:
+            tipoDocumento:
+              type: string
+              example: 6
+              description: Tipo de documento de identidad del Destinatario
+            numeroDocumento:
+              type: string
+              example: 20306841506
+              description: Número de documento de identidad del destinatario
+            nombre:
+              type: string
+              example: JOCKEY PLAZA  S.A
+              description: Apellidos y nombres, denominación o razón social del Destinatario
+            correo:
+              type: array
+              description: Correos de cliente separados por coma.
+              example: [ "test@gmail.com", "test@outlook.com" ]
+              items:
+                format: string
+        notas:
+          type: string
+          example: Emisión de Guía para transporte público
+          description: Observaciones que se puedan ser tomadas en cuenta durante el traslado de los bienes.
+        identificadorPlantilla:
+          type: string
+          example: TE092.Jasper
+          description: Identificador de la plantilla.
+    Carrier:
+      type: object
+      description: Detalles del punto de entrega
+      required:
+        - modalidadTraslado
+        - fechaInicioTraslado
+        - motivoTraslado
+      properties:
+        motivoTraslado:
+          type: string
+          example: 01
+          description: Motivo del traslado.
+        descripcionMotivoTraslado:
+          type: string
+          example:
+          description: Descripción de motivo de traslado.
+        modalidadTraslado:
+          type: string
+          example: 18
+          description: Modalidad de traslado
+        fechaInicioTraslado:
+          type: string
+          example: 2022-10-10
+          description: Fecha de inicio del traslado de los bienes
+          format: date
+        transportista:
+          type: object
+          properties:
+            tipoDocumento:
+              type: string
+              example: 6
+              description: Transporte Público - Tipo de documento del transportista
+            numeroDocumento:
+              type: string
+              example: 20100015103
+              description: Transporte Público - Número de RUC transportista
+            nombre:
+              type: string
+              example: TRANSPORTES 77 S.A.C.
+              description: Transporte Público  - Apellidos y Nombres o denominación o razón social del transportista
+            autorizacionEspecial:
+              type: object
+              properties:
+                numeroAutorizacion:
+                  type: string
+                  example: 18978
+                  description: Número de autorización especial del vehículo emitido por la entidad
+                entidadEmisora:
+                  type: string
+                  example: 06
+                  description: Entidad emisora de la autorización especial
+        fechaRecepcionBienes:
+          type: string
+          example: 2022-10-10
+          description: Fecha de entrega de bienes al transportista
+          format: date
+        conductor:
+          type: object
+          required:
+            - numeroDocumento
+          properties:
+            tipoDocumento:
+              type: string
+              example: 06
+              description: Tipo de documento de identidad del conductor principal
+            numeroDocumento:
+              type: string
+              example: 6666666666
+              description: Número de documento de identidad del conductor principal
+            primerNombre:
+              type: string
+              example: Jose
+              description: Primer nombre del conductor principal
+            segundoNombre:
+              type: string
+              example: Manuel
+              description: Segundo nombre del conductor principal
+            apellidos:
+              type: string
+              example: Ayarza Chavez
+              description: Apellidos del conductor principal
+            numeroLicencia:
+              type: string
+              example: 22222222
+              description: Número de licencia de conducir principal
+            NumeroRegistro:
+              type: string
+              example: 22222222
+              description: Número de Registro MTC del transportista
+        carga:
+          type: object
+          required:
+            - pesoBrutoTotal
+            - unidadMedidaPesoBruto
+            - horaEmision
+          properties:
+            pesoBrutoTotal:
+              type: number
+              example: 12.3
+              description: Peso bruto total de la CARGA
+            unidadMedidaPesoBruto:
+              type: string
+              example: KGM
+              description: Unidad de medida del peso bruto
+            horaEmision:
+              type: string
+              example: 05:00:00
+              description: Hora de emisión. Formato hh:mm:ss
+        vehiculo:
+          type: object
+          required:
+            - numeroPlaca
+            - numeroTarjetaCirculacion
+          properties:
+            numeroPlaca:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+            numeroTarjetaCirculacion:
+              type: string
+              example: 15-P89674532-O2
+              description: >-
+                "Número de la Tarjeta Única de Circulación o Certificado de Habilitación Vehicular Especial expedido por el Ministerio de  Transportes y Comunicaciones".
+            autorizacionEspecial:
+              type: object
+              required:
+                - numeroAutorizacion
+                - entidadEmisora
+              properties:
+                numeroAutorizacion:
+                  type: string
+                  example: 18978
+                  description: Número de autorización especial del vehículo emitido por la entidad
+                entidadEmisora:
+                  type: string
+                  example: 06
+                  description: Entidad emisora de la autorización especial
+        puntoPartida:
+          type: object
+          required:
+            - codigoUbigeo
+            - direccion
+          properties:
+            codigoUbigeo:
+              type: string
+              example:
+              description: Ubigeo del punto de partida
+            direccion:
+              type: string
+              example:
+              description: Dirección del punto de partida
+            codigoEstablecimiento:
+              type: string
+              example:
+              description: Código del establecimiento
+            rucDistribuidora:
+              type: string
+              example:
+              description: Número de la Distribuidora asociada al punto de partida.
+        puntoLlegada:
+          type: object
+          required:
+            - codigoUbigeo
+          properties:
+            codigoUbigeo:
+              type: string
+              example: 150122
+              description: Ubigeo del punto de llegada
+            direccion:
+              type: string
+              example: CAR. PANAM SUR KM 25 NO. 25050 NRO. 050 Z.I. CONCHAN
+              description: Dirección del punto de llegada
+            rucAsociado:
+              type: string
+              example:
+              description: Número de RUC asociado al punto de llegada
+            latitud:
+              type: string
+              example: -76.45
+              description: Punto de georreferencia del punto de llegada - Longitud
+            longitud:
+              type: string
+              example: 12.14
+              description: Punto de georreferencia del punto de llegada - Latitud
+    Items:
+      type: array
+      description: Detalles de Bienes a Transportar
+      items:
+        $ref: '#/components/schemas/Item'
+    Item:
+      type: object
+      required:
+        - numeroOrden
+        - cantidad
+        - unidadMedida
+        - descripcion
+        - peso
+      properties:
+        numeroOrden:
+          type: string
+          example: 1
+          description: Número de orden del ítem
+        cantidad:
+          type: number
+          example: 10
+          description: Cantidad del ítem
+        unidadMedida:
+          type: string
+          example: KGM
+          description: Unidad de medida del ítem
+        descripcion:
+          type: string
+          example: ACEITE
+          description: Descripción detallada del ítem
+        codigoItem:
+          type: string
+          example: COD0002
+          description: Código  del ítem
+        peso:
+          type: number
+          example: 80563443
+          description: Peso por ítem valor del peso + el codigo de la unidad de medida según catálogo SUNAT
+    OnlineGenerationS4:
+      type: object
+      description: Generación online para s4.
+      properties:
+        organizacion:
+          type: object
+          description: Organización.
+          required:
+            - pais-T001-LAND1
+            - sociedad-T001-BUKRS
+          properties:
+            pais-T001-LAND1:
+              type: string
+              example: 'PE'
+              description: Código del país, según el estándar ISO-3166.
+            organizacionVenta-LIKP-VKORG:
+              type: string
+              example: '10050'
+              description: Organización de ventas.
+            sociedad-T001-BUKRS:
+              type: string
+              example: '10050'
+              description: Código  de sociedad.
+        pedido:
+          type: object
+          description: Pedido.
+          properties:
+            numeroPedido-LIPS-VGBEL:
+              type: string
+              example: 0090884754
+              description: Número de Pedido.
+            importeTotal-LIPS-KZWI4:
+              type: number
+              format: double
+              example: 4754.21
+              description: Importe total de Pedido.
+            importeTotal-LIKP-WAERK:
+              type: string
+              example: PEN
+              description: Importe total de Pedido (tipo de moneda).
+            exportacion:
+              type: object
+              description: Exportación.
+              properties:
+                numeroReserva-VTTK-NUM_RESERVA:
+                  type: string
+                  example: 32546
+                  description: Número de reserva.
+                precintoAduana-VTTK-PREC_ADUA:
+                  type: string
+                  example: TE
+                  description: Precinto de aduana.
+                precintoLinea-VTTK-PREC_LINEA:
+                  type: string
+                  example: DR
+                  description: Precinto en línea.
+                numeroContenedor-VTTK-NUM_CONT:
+                  type: string
+                  example: 345
+                  description: Número de contenedor.
+                codigoPuertoAeropuerto-ADRC-POST_CODE1:
+                  type: string
+                  example: 4536345
+                  description: Código  de puerto o aeropuerto.
+                almacen:
+                  type: object
+                  description: Almacén
+                  properties:
+                    nombreAlmacen-ADRC-NAME1:
+                      type: string
+                      example: Caros
+                      description: Nombre de almacén.
+                    nombreAlmacen-ADRC-NAME2:
+                      type: string
+                      example: Drean
+                      description: Nombre de almacén.
+                    rucAlmacen-DFKKBPTAXNUM-TAXNUM:
+                      type: string
+                      example: 1345224563
+                      description: Ruc de almacén.
+                    direccion-ADRC-STREET:
+                      type: string
+                      example: Cal. Archipielago Mz. B Lote 30A-Urb. La Capitana
+                      description: Dirección del destinatario
+                    direccion-ADRC-HOUSE_NUM1:
+                      type: string
+                      example: 1
+                      description: Dirección del destinatario
+                    direccion-ADRC-CITY2:
+                      type: string
+                      example: Lurigancho
+                      description: Dirección del destinatario
+                    direccion-ADRC-CITY1:
+                      type: string
+                      example: Lima
+                      description: Dirección del destinatario
+        documentoElectronico:
+          $ref: '#/components/schemas/ElectronicDocumentS4'
+        entrega:
+          $ref: '#/components/schemas/CarrierS4'
+        items:
+          $ref: '#/components/schemas/ItemsS4'
+    ElectronicDocumentS4:
+      type: object
+      description: Detalles del documento electronico a emitir
+      required:
+        - tipoDocumento-LIKP-VBTYP
+        - numeroCorrelativo-LIKP-XBLNR
+        - fechaEmision-LIKP-WADAT_IST
+      properties:
+        tipoDocumento-LIKP-VBTYP:
+          type: string
+          example: j
+          description: Tipo de Documento.
+        numeroCorrelativo-LIKP-XBLNR:
+          type: string
+          example: T627-00000001
+          description: Numeración, conformada por serie y número correlativo.
+        fechaEmision-LIKP-WADAT_IST:
+          type: string
+          example: 2022-10-13
+          description: Fecha Emisión. (yyyy-mm-dd)
+          format: date
+        documentoRelacionado:
+          type: object
+          description: Documento relacionado.
+          properties:
+            numeroDocumento-VTTK-NUM_DAM:
+              type: string
+              example: 346567345
+              description: Número de documento Relacionado.
+        cliente:
+          type: object
+          description: Cliente.
+          properties:
+            codigoCliente-VBPA-KUNNR:
+              type: string
+              example: 1000016949
+              description: Código  de cliente.
+            correoCliente-ADR6-SMTP_ADDR:
+              type: array
+              description: Correos de cliente.
+              example: [ "caros@drean.com" ]
+              items:
+                format: string
+        remitente:
+          type: object
+          description: Remitente.
+          required:
+            - tipoDocumento-DFKKBPTAXNUM-TAXTYPE
+            - numeroDocumento-BUT000-BU_SORT2
+            - nombre-BUT000-NAME_ORG1
+          properties:
+            tipoDocumento-DFKKBPTAXNUM-TAXTYPE:
+              type: string
+              example: PE1
+              description: Tipo de Documento de identidad del Remitente
+            numeroDocumento-BUT000-BU_SORT2:
+              type: string
+              example: 20100055237
+              description: Número de documento de Identidad del Remitente
+            nombre-BUT000-NAME_ORG1:
+              type: string
+              example: ALICORP S.A.A.
+              description: Apellidos y nombres, denominación o razón social del remitente
+        destinatario:
+          type: object
+          description: Destinatario
+          required:
+            - tipoDocumento-DFKKBPTAXNUM-TAXTYPE
+            - numeroDocumento-DFKKBPTAXNUM-TAXNUM
+          properties:
+            tipoDocumento-DFKKBPTAXNUM-TAXTYPE:
+              type: string
+              example: PE1
+              description: Tipo de documento de identidad del Destinatario
+            numeroDocumento-DFKKBPTAXNUM-TAXNUM:
+              type: string
+              example: 20306841506
+              description: Número de documento de identidad del destinatario
+            nombre-ADRC-NAME1:
+              type: string
+              example: JOCKEY PLAZA  S.A
+              description: Apellidos y nombres, denominación o razón social del Destinatario
+            nombre-ADRC-NAME2:
+              type: string
+              example: JOCKEY PLAZA  S.A
+              description: Apellidos y nombres, denominación o razón social del Destinatario
+        notas-LIKP-Z_OBSERVACIONES:
+          type: string
+          example: Emisión de Guía para transporte público
+          description: Observaciones que se puedan ser tomadas en cuenta durante el traslado de los bienes.
+    CarrierS4:
+      type: object
+      description: Entrega.
+      properties:
+        numeroEntrega-LIKP-VBELN:
+          type: string
+          example: 80678540
+          description: Número de entrega.
+        numeroTransporte-LIKP-ZZTOR_ID:
+          type: string
+          example: 00000000006100371880
+          description: Número de transporte.
+        numeroTransporte-VBFA-VBELN:
+          type: string
+          example: 01
+          description: Número de transporte.
+        tipoPlaca-FLAG-TM_LETRA:
+          type: string
+          example: TM
+          description: Indicador del tipo de placa.
+        motivoTraslado-TVLK-AUFER:
+          type: string
+          example: X
+          description: Motivo del traslado.
+        motivoTraslado-LIPS-VTWEG:
+          type: string
+          example: 01
+          description: Motivo del traslado.
+        motivoTraslado-LIPS-FKSTA:
+          type: string
+          example: C
+          description: Motivo del traslado.
+        motivoTraslado-T001K-BUKRS1:
+          type: string
+          example: PE11
+          description: Motivo del traslado.
+        motivoTraslado-T001K-BUKRS2:
+          type: string
+          example: PE11
+          description: Motivo del traslado.
+        motivoTraslado-ADRC-COUNTRY:
+          type: string
+          example: PE
+          description: Motivo del traslado.
+        motivoTraslado-TVST-ALAND:
+          type: string
+          example: PE
+          description: Motivo del traslado.
+        motivoTraslado-LIKP-VBTYP:
+          type: string
+          example: J
+          description: Motivo del traslado.
+        fechaInicioTraslado-LIKP-WADAT_IST:
+          type: string
+          example: 2022-10-10
+          description: Fecha de inicio del traslado de los bienes. (yyyy-mm-dd)
+          format: date
+        transportista:
+          type: object
+          description: Transportista.
+          properties:
+            tipoDocumento-DFKKBPTAXNUM-TAXTYPE:
+              type: string
+              example: PE1
+              description: Transporte Público - Tipo de documento del transportista
+            numeroDocumento-DFKKBPTAXNUM-TAXNUM:
+              type: string
+              example: 20100015103
+              description: Transporte Público - Número de RUC transportista
+            nombre-BUT000-NAME_ORG1:
+              type: string
+              example: TRANSPORTES 77 S.A.C.
+              description: Transporte Público  - Apellidos y Nombres o denominación o razón social del transportista
+            nombre-BUT000-NAME_ORG2:
+              type: string
+              example: TRANSPORTES 77 S.A.C.
+              description: Transporte Público  - Apellidos y Nombres o denominación o razón social del transportista
+        conductor:
+          type: object
+          description: Conductor
+          properties:
+            primerNombre-LIKP-ZZNAMEDRIVER:
+              type: string
+              example: Jose
+              description: Primer nombre del conductor principal
+            primerNombre-VTTK-TPBEZ:
+              type: string
+              example: Jose
+              description: Primer nombre del conductor principal
+            segundoNombre-LIKP-ZZNAMEDRIVER:
+              type: string
+              example: Manuel
+              description: Segundo nombre del conductor principal
+            segundoNombre-VTTK-TPBEZ:
+              type: string
+              example: Manuel
+              description: Segundo nombre del conductor principal
+            apellidos-LIKP-ZZNAMEDRIVER:
+              type: string
+              example: Ayarza Chavez
+              description: Apellidos del conductor principal
+            apellidos-VTTK-TPBEZ:
+              type: string
+              example: Ayarza Chavez
+              description: Apellidos del conductor principal
+            numeroLicencia-LIKP-ZZLICDRIVER:
+              type: string
+              example: 22222222
+              description: Número de licencia de conducir principal
+            numeroLicencia-VTTK-EXTI2:
+              type: string
+              example: 22222222
+              description: Número de licencia de conducir principal
+            numeroDocumento-CONSTANT-NUMDOCCOND:
+              type: string
+              example: 23414543
+              description: Número de documento de identidad de conducir principal
+            tipoDocumento-CONSTANT-TIPDOCCOND:
+              type: string
+              example: 1
+              description: Tipo de documento de identidad de conducir principal
+        carga:
+          type: object
+          description: Carga.
+          required:
+            - pesoBrutoTotal-LIKP-BTGEW
+            - unidadMedidaPesoBruto-LIKP-GEWEI
+            - horaEmision-LIKP-SPE_WAUHR_IST
+          properties:
+            pesoBrutoTotal-LIKP-BTGEW:
+              type: number
+              format: double
+              example: 12.3
+              description: Peso bruto total de la CARGA
+            unidadMedidaPesoBruto-LIKP-GEWEI:
+              type: string
+              example: KG
+              description: Unidad de medida del peso bruto
+            horaEmision-LIKP-SPE_WAUHR_IST:
+              type: string
+              example: 05:00:00
+              description: Hora de emisión. Formato hh:mm:ss
+        vehiculo:
+          type: object
+          description: Vehiculo
+          properties:
+            numeroPlaca-LIKP-ZZPLATENUMBER1:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+            numeroPlaca-LIKP-ZZPLATENUMBER2:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+            numeroPlaca-LIKP-ZZPLATENUMBER:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+            numeroPlaca-VTTK-SIGNI:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+            numeroPlaca-VTTK-TEXT1:
+              type: string
+              example: PGY-645
+              description: Número de placa de vehículo
+        puntoPartida:
+          type: object
+          description: Punto de partida.
+          required:
+            - codigoUbigeo-ADRC-POST_CODE1
+          properties:
+            puntoExpedicion-LIKP-VSTEL:
+              type: string
+              example: 1010
+              description: Punto de expedición.
+            codigoUbigeo-ADRC-POST_CODE1:
+              type: string
+              example: 150132
+              description: Ubigeo del punto de partida
+            direccion-ADRC-STREET:
+              type: string
+              example: Cal. Archipielago Mz. B Lote 30A-Urb. La Capitana
+              description: Dirección del punto de partida
+            direccion-ADRC-HOUSE_NUM1:
+              type: string
+              example: 1
+              description: Dirección del punto de partida
+            direccion-ADRC-CITY2:
+              type: string
+              example: Lurigancho
+              description: Dirección del punto de partida
+            direccion-ADRC-CITY1:
+              type: string
+              example: Lima
+              description: Dirección del punto de partida
+            codigoEstablecimiento-ZO2CM_SERIES_PTE-COD_ESTAB:
+              type: string
+              example: 0227
+              description: Código del establecimiento
+            rucAsociado-BUT000-BU_SORT2:
+              type: string
+              example: 20100055237
+              description: Número de RUC asociado al punto de partida.
+        puntoLlegada:
+          type: object
+          description: Punto de llegada.
+          properties:
+            codigoUbigeo-ADRC-POST_CODE1:
+              type: string
+              example: 150122
+              description: Ubigeo del punto de llegada
+            direccion-ADRC-STREET:
+              type: string
+              example: CAR. PANAM SUR KM 25 NO. 25050 NRO. 050 Z.I. CONCHAN
+              description: Dirección del punto de llegada
+            direccion-ADRC-HOUSE_NUM1:
+              type: string
+              example: 1
+              description: Dirección del punto de llegada
+            direccion-ADRC-CITY2:
+              type: string
+              example: LURIGANCHO
+              description: Dirección del punto de llegada
+            direccion-ADRC-CITY1:
+              type: string
+              example: LIMA - LIMA
+              description: Dirección del punto de llegada
+            rucAsociado-DFKKBPTAXNUM_TAXNUM:
+              type: string
+              example: 235346245462
+              description: Número de RUC asociado al punto de llegada
+    ItemsS4:
+      type: array
+      description: Lista de items.
+      items:
+        $ref: '#/components/schemas/ItemS4'
+    ItemS4:
+      type: object
+      description: Item.
+      required:
+        - numeroOrden-LIPS-POSNR
+        - unidadMedida-LIPS-VRKME
+      properties:
+        numeroOrden-LIPS-POSNR:
+          type: number
+          example: 1
+          description: Número de orden del ítem
+        cantidad-LIPS-LFIMG:
+          type: number
+          format: double
+          example: 10.00
+          description: Cantidad del ítem
+        unidadMedida-LIPS-VRKME:
+          type: string
+          example: CJA
+          description: Unidad de medida del ítem
+        nombre-LIPS-ARKTX:
+          type: string
+          example: SALSA ROJA DON VITTORIO 200GR.12DPK
+          description: Nombre del ítem
+        descripcion-LIPS-BRGEW:
+          type: number
+          format: double
+          example: 62.400
+          description: Descripción detallada del ítem (peso)
+        descripcion-LIPS-GEWEI:
+          type: string
+          example: KG
+          description: Descripción detallada del ítem (unidad de medida peso)
+        descripcion-LIPS-KZWI4:
+          type: number
+          format: double
+          example: 1000.08
+          description: Descripción detallada del ítem (importe)
+        descripcion-LIKP-WAERK:
+          type: string
+          example: PEN
+          description: Descripción detallada del ítem (tipo de moneda)
+        descripcion-LIPS-XCHPF:
+          type: string
+          example: X
+          description: Descripción detallada del ítem
+        descripcion-LIPS-CHARG:
+          type: string
+          example: 2112300120
+          description: Descripción detallada del ítem (lote)
+        codigoItem-LIPS-MATNR:
+          type: string
+          example: 3300140
+          description: Código  del ítem
+        codigoProductoSunat-MARA-EXTWG:
+          type: string
+          example: 50171800
+          description: Código  del ítem en sunat.
+    BadRequest:
+      type: object
+      description: Object of response error
+      properties:
+        code:
+          type: string
+          description: custom code of response
+          example: BAD_REQUEST
+        message:
+          type: string
+          description: message of response
+          example: >-
+            Request is not well-formed, syntactically incorrect, or violates
+            schema.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetailUnprocessableEntity'
+    UnexpectedError:
+      type: object
+      description: Object of response error
+      properties:
+        code:
+          type: string
+          description: custom code of response
+          example: INTERNAL_SERVER_ERROR
+        message:
+          type: string
+          description: message of response
+          example: An internal server error has occurred.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetailInternalServerErrorBack'
+    UnprocessableEntity:
+      type: object
+      description: Object of response error
+      properties:
+        code:
+          type: string
+          description: custom code of response
+          example: UNPROCESSABLE_ENTITY
+        message:
+          type: string
+          description: message of response
+          example: >-
+            The requested action could not be performed, semantically incorrect,
+            or failed business validation.
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/DetailUnprocessableEntity'
+    DetailUnprocessableEntity:
+      type: object
+      description: Detail of response error
+      properties:
+        field:
+          type: string
+          example: Aplication-Code
+          description: wrong or invalid field
+        issue:
+          type: string
+          example: MISSING_REQUIRED_HEADER
+          description: custom code of field
+        description:
+          type: string
+          example: can not be empty.
+          description: description of field
+    DetailInternalServerErrorBack:
+      type: object
+      description: Detail of response error
+      properties:
+        description:
+          type: string
+          example: "Code: -5, Message: Error al recuperar el Certificado de la Empresa"
+          description: code and description of server error
