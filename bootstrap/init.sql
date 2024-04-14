@@ -2,9 +2,9 @@
 -- https://dbdiagram.io/d/reto-financiera-6619eed803593b6b61e2a3ea
 
 CREATE TYPE "gender" AS ENUM (
-  'M',
-  'F'
-);
+    'M',
+    'F'
+    );
 
 CREATE TABLE "customers"
 (
@@ -28,7 +28,7 @@ CREATE TABLE "cities"
 (
     "id"          serial PRIMARY KEY,
     "name"        varchar(100) NOT NULL,
-    "postal_Code" varchar(20),
+    "postal_code" varchar(20),
     "created_at"  timestamp DEFAULT now(),
     "updated_at"  timestamp,
     "deleted_at"  timestamp
@@ -45,79 +45,79 @@ CREATE TABLE "city_customers"
 );
 
 COMMENT
-ON TABLE "customers" IS '
+    ON TABLE "customers" IS '
 Tabla de clientes
 Se usara tambien como usuario
 ';
 
 COMMENT
-ON COLUMN "customers"."first_name" IS 'Nombre del cliente';
+    ON COLUMN "customers"."first_name" IS 'Nombre del cliente';
 
 COMMENT
-ON COLUMN "customers"."last_name" IS 'Apellido del cliente';
+    ON COLUMN "customers"."last_name" IS 'Apellido del cliente';
 
 COMMENT
-ON COLUMN "customers"."dni" IS 'DNI';
+    ON COLUMN "customers"."dni" IS 'DNI';
 
 COMMENT
-ON COLUMN "customers"."birth_date" IS 'Fecha de nacimiento';
+    ON COLUMN "customers"."birth_date" IS 'Fecha de nacimiento';
 
 COMMENT
-ON COLUMN "customers"."gender" IS 'Sexo';
+    ON COLUMN "customers"."gender" IS 'Sexo';
 
 COMMENT
-ON COLUMN "customers"."email" IS 'Correo';
+    ON COLUMN "customers"."email" IS 'Correo';
 
 COMMENT
-ON COLUMN "customers"."is_staff" IS 'flag para validar si es usuario admin';
+    ON COLUMN "customers"."is_staff" IS 'flag para validar si es usuario admin';
 
 COMMENT
-ON COLUMN "customers"."picture" IS 'Imagen del cliente';
+    ON COLUMN "customers"."picture" IS 'Imagen del cliente';
 
 COMMENT
-ON COLUMN "customers"."created_at" IS 'Fecha de creacion del registro';
+    ON COLUMN "customers"."created_at" IS 'Fecha de creacion del registro';
 
 COMMENT
-ON COLUMN "customers"."updated_at" IS 'Fecha de actualizacion del registro';
+    ON COLUMN "customers"."updated_at" IS 'Fecha de actualizacion del registro';
 
 COMMENT
-ON COLUMN "customers"."deleted_at" IS 'Fecha de eliminacion del registro';
+    ON COLUMN "customers"."deleted_at" IS 'Fecha de eliminacion del registro';
 
 COMMENT
-ON TABLE "cities" IS 'Tabla de ciudades';
+    ON TABLE "cities" IS 'Tabla de ciudades';
 
 COMMENT
-ON COLUMN "cities"."name" IS 'Nombre de la Ciudad';
+    ON COLUMN "cities"."name" IS 'Nombre de la Ciudad';
 
 COMMENT
-ON COLUMN "cities"."postal_Code" IS 'Codigo postal';
+    ON COLUMN "cities"."postal_code" IS 'Codigo postal';
 
 COMMENT
-ON COLUMN "cities"."created_at" IS 'Fecha de creacion del registro';
+    ON COLUMN "cities"."created_at" IS 'Fecha de creacion del registro';
 
 COMMENT
-ON COLUMN "cities"."updated_at" IS 'Fecha de actualizacion del registro';
+    ON COLUMN "cities"."updated_at" IS 'Fecha de actualizacion del registro';
 
 COMMENT
-ON COLUMN "cities"."deleted_at" IS 'Fecha de eliminacion del registro';
+    ON COLUMN "cities"."deleted_at" IS 'Fecha de eliminacion del registro';
 
 COMMENT
-ON TABLE "city_customers" IS 'Tabla de relacion muchos a muchos de customers y cities';
+    ON TABLE "city_customers" IS 'Tabla de relacion muchos a muchos de customers y cities';
 
 COMMENT
-ON COLUMN "city_customers"."customer_id" IS 'id del cliente';
+    ON COLUMN "city_customers"."customer_id" IS 'id del cliente';
 
 COMMENT
-ON COLUMN "city_customers"."city_id" IS 'id de la ciudad';
+    ON COLUMN "city_customers"."city_id" IS 'id de la ciudad';
 
 COMMENT
-ON COLUMN "city_customers"."created_at" IS 'Fecha de creacion del registro';
+    ON COLUMN "city_customers"."created_at" IS 'Fecha de creacion del registro';
 
 COMMENT
-ON COLUMN "city_customers"."updated_at" IS 'Fecha de actualizacion del registro';
+    ON COLUMN "city_customers"."updated_at" IS 'Fecha de actualizacion del registro';
 
 COMMENT
-ON COLUMN "city_customers"."deleted_at" IS 'Fecha de eliminacion del registro';
+    ON COLUMN "city_customers"."deleted_at" IS 'Fecha de eliminacion del registro';
 
 ALTER TABLE "city_customers"
     ADD FOREIGN KEY ("customer_id") REFERENCES "customers" ("id");
@@ -140,7 +140,7 @@ VALUES ('Juan', 'Pérez', '12345678', '1990-05-15', 'M', true),
        ('Sara', 'Ruiz', '90123456', '1982-04-05', 'F', false),
        ('David', 'García', '01234567', '1975-10-29', 'M', false);
 
-INSERT INTO cities ("name", "postal_Code")
+INSERT INTO cities ("name", "postal_code")
 VALUES ('Ciudad de México', '01000'),
        ('Buenos Aires', 'B1228'),
        ('Madrid', '28001'),

@@ -18,6 +18,7 @@ require (
 )
 
 require (
+	github.com/MikelSot/repository v0.0.0-20240413222740-a7287222b6f2 // indirect
 	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
