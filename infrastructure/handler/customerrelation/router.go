@@ -40,8 +40,8 @@ func routes(api *gin.Engine, h handler, middlewares ...gin.HandlerFunc) {
 	routes := api.Group(_routesPrefix, middlewares...)
 
 	routes.POST("", h.Create)
-	routes.PUT("/:id", h.Create)
-	routes.DELETE("customers/:id/cities/:city-id", h.Delete)
+	routes.PUT("/:id", h.Update)
+	routes.DELETE("/customers/:id/cities/:city-id", h.Delete)
 
 	routes.GET("/customers", h.GetAllCustomers)
 }

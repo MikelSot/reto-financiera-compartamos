@@ -66,15 +66,15 @@ func (c City) Delete(ID uint) error {
 
 func (c City) GetByID(ID uint) (model.City, error) {
 	if ID == 0 {
-		return model.City{}, model.ErrInvalidID
+		return model.City{}, fmt.Errorf("city: %w", model.ErrInvalidID)
 	}
 
-	customer, err := c.storage.GetWhere(repository.FieldsSpecification{Filters: repository.Fields{{Name: "id", Value: ID}}})
+	city, err := c.storage.GetWhere(repository.FieldsSpecification{Filters: repository.Fields{{Name: "id", Value: ID}}})
 	if err != nil {
 		return model.City{}, fmt.Errorf("city: %w", err)
 	}
 
-	return customer, nil
+	return city, nil
 }
 
 func (c City) GetAllByIds(IDs []uint) (model.Cities, error) {
