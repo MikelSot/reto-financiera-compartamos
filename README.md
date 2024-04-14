@@ -17,6 +17,16 @@ API CRUD de clientes asociados a ciudades.
 ---
 ### Documentación
 
+**Codigo**
+
+El proyecto tiene uns estructura de arquitectura hexagonal, donde se separa la logica de negocio de la logica de persistencia.
+ademas del control de errores, tambien se manejo una salida standar de respuesta cuando hay un error o cuando la peticion fue todo un exito.
+
+Se uso _Gin_ como framework para el manejo de rutas y ORM(basico) basado en https://github.com/AJRDRGZ/db-query-builder para el manejo de la base de datos.
+
+Se uso un logger para el manejo de errores y mensajes de salida, se uso _zap_ como logger. Esto nos ayuda para la trazabilidad(Basica) de donde se origino el error.
+
+
 **APIs(Open api)**
 
 En la carpeta _.encora/apim/openapi-spec.yaml_ se encuentra la documentación detallada de los endpoints, el tipo de dato de cada campo,
@@ -27,7 +37,7 @@ o puede utilizar el siguiente link: [Doc Endpoints](https://app.swaggerhub.com/a
 
 **Base de datos**
 
-En el siguiente link([Dock db](https://dbdiagram.io/d/reto-financiera-6619eed803593b6b61e2a3ea)) se encuentra el diagrama de la base de datos,
+Se uso _PostgreSQL_ en la base de datos, en el siguiente link([Dock db](https://dbdiagram.io/d/reto-financiera-6619eed803593b6b61e2a3ea)) se encuentra el diagrama de la base de datos,
 con las tablas y las relaciones entre ellas. Ademas de que campos tiene cada tabla y la descripcion de cada columna.
 
 ---
