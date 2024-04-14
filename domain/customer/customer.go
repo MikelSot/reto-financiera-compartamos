@@ -7,9 +7,9 @@ import (
 )
 
 type UseCase interface {
-	Create(m model.Customer) error
+	Create(m *model.Customer) error
 	Update(m model.Customer) error
-	CreateDelete(ID uint) error
+	UpdateDeletedAt(Id uint) error
 	Delete(ID uint) error
 
 	GetByID(ID uint) (model.Customer, error)
@@ -17,8 +17,9 @@ type UseCase interface {
 }
 
 type Storage interface {
-	Create(m model.Customer) error
+	Create(m *model.Customer) error
 	Update(m model.Customer) error
+	UpdateDeletedAt(Id uint) error
 	Delete(ID uint) error
 
 	GetWhere(specification repository.FieldsSpecification) (model.Customer, error)

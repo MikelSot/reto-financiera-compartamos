@@ -34,7 +34,7 @@ func (c CityCustomer) Update(m model.CityCustomer) error {
 	}
 
 	if !m.HasID() {
-		return model.ErrInvalidID
+		return fmt.Errorf("citycustomer: %w", model.ErrInvalidID)
 	}
 
 	if err := c.storage.Update(m); err != nil {

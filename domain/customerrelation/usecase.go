@@ -1,8 +1,11 @@
 package customerrelation
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/MikelSot/reto-financiera-compartamos/model"
 )
@@ -22,7 +25,7 @@ func (c CustomerRelation) Create(m model.CustomerRelation) error {
 		return fmt.Errorf("customerrelation: %w", err)
 	}
 
-	if err := c.customer.Create(m.Customer); err != nil {
+	if err := c.customer.Create(&m.Customer); err != nil {
 		return err
 	}
 
@@ -88,6 +91,17 @@ func (c CustomerRelation) Update(m model.CustomerRelation) error {
 		CityID:     m.City.Id,
 	}
 
+	// If the client association with the city does not exist, we create it
+	cityCustomer, err := c.cityCustomer.GetAllByCustomerIDs([]uint{m.Customer.Id})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return c.cityCustomer.Create(customerCity)
+	}
+	if err != nil {
+		return err
+	}
+
+	customerCity.Id = cityCustomer[0].Id
+
 	if err := c.cityCustomer.Update(customerCity); err != nil {
 		return err
 	}
@@ -96,16 +110,19 @@ func (c CustomerRelation) Update(m model.CustomerRelation) error {
 }
 
 func (c CustomerRelation) Delete(customerID uint, cityID uint) error {
-	if err := c.customer.CreateDelete(customerID); err != nil {
-		return err
-	}
-
 	cityCustomer, err := c.cityCustomer.GetByCustomerIDAndCityID(customerID, cityID)
 	if err != nil {
 		return err
 	}
+	fmt.Println("cityCustomer")
+	fmt.Println(cityCustomer)
+
+	if err := c.customer.CreateDelete(customerID); err != nil {
+		return err
+	}
+
 	if !cityCustomer.HasID() {
-		return model.ErrInvalidID
+		return fmt.Errorf("customerrelation: %w", model.ErrInvalidID)
 	}
 
 	if err := c.cityCustomer.Delete(cityCustomer.Id); err != nil {
@@ -131,15 +148,18 @@ func (c CustomerRelation) GetAllCustomers() (model.CustomerRelations, error) {
 		return model.CustomerRelations{}, fmt.Errorf("customerrelation: %w", err)
 	}
 
+	cityCustomerMap := cityCustomers.MakeMapByCustomerId()
 	customerMap := customers.MakeMapById()
 	cityMap := cities.MakeMapById()
 
 	relations := model.CustomerRelations{}
-	for _, cityCustomer := range cityCustomers {
-		customer, ok := customerMap[cityCustomer.CustomerID]
+	for _, customer := range customers {
+		customer, ok := customerMap[customer.Id]
 		if !ok {
 			continue
 		}
+
+		cityCustomer, _ := cityCustomerMap[customer.Id]
 
 		city, _ := cityMap[cityCustomer.CityID]
 

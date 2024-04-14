@@ -27,7 +27,7 @@ const _table = "city_customers"
 var (
 	_psqlInsert = repository.BuildSQLInsertNoID(_table, _fieldInserts)
 	_psqlUpdate = repository.BuildSQLUpdateByID(_table, _fieldInserts)
-	_psqlDelete = "DELETE FROM " + _table + " WHERE customer_id = $1 AND city_id = $2"
+	_psqlDelete = "DELETE FROM " + _table + " WHERE id = $1"
 
 	_psqlGetAll = repository.BuildSQLSelectFields(_table, append(_fieldInserts, _fieldsSelect...))
 )

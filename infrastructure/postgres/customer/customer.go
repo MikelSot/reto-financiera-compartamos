@@ -3,6 +3,8 @@ package customer
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/MikelSot/repository"
 	"github.com/jackc/pgx/v5"
@@ -32,9 +34,10 @@ var _fieldsSelect = []string{
 const _table = "customers"
 
 var (
-	_psqlInsert = repository.BuildSQLInsertNoID(_table, _fieldInserts)
-	_psqlUpdate = repository.BuildSQLUpdateByID(_table, _fieldInserts)
-	_psqlDelete = "DELETE FROM " + _table + " WHERE id = $1"
+	_psqlInsert          = repository.BuildSQLInsertNoID(_table, _fieldInserts)
+	_psqlUpdate          = repository.BuildSQLUpdateByID(_table, _fieldInserts)
+	_psqlDelete          = "DELETE FROM " + _table + " WHERE id = $1"
+	_psqlUpdateDeletedAt = "UPDATE " + _table + " SET deleted_at = now() WHERE id = $1"
 
 	_psqlGetAll = repository.BuildSQLSelectFields(_table, append(_fieldInserts, _fieldsSelect...))
 )
@@ -47,10 +50,10 @@ func New(db model.PgxPool) Customer {
 	return Customer{db: db}
 }
 
-func (c Customer) Create(m model.Customer) error {
+func (c Customer) Create(m *model.Customer) error {
 	ctx := context.Background()
 
-	_, err := c.db.Exec(
+	err := c.db.QueryRow(
 		ctx,
 		_psqlInsert,
 		m.FirstName,
@@ -62,7 +65,7 @@ func (c Customer) Create(m model.Customer) error {
 		m.IsStaff,
 		repository.StringToNull(m.Picture),
 		repository.StringToNull(m.Nickname),
-	)
+	).Scan(&m.Id, &m.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -94,6 +97,23 @@ func (c Customer) Update(m model.Customer) error {
 	return nil
 }
 
+func (c Customer) UpdateDeletedAt(Id uint) error {
+	ctx := context.Background()
+
+	fmt.Println(_psqlUpdateDeletedAt)
+
+	_, err := c.db.Exec(
+		ctx,
+		_psqlUpdateDeletedAt,
+		Id,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c Customer) Delete(ID uint) error {
 	ctx := context.Background()
 
@@ -115,6 +135,9 @@ func (c Customer) GetWhere(specification repository.FieldsSpecification) (model.
 	query, args := repository.BuildQueryAndArgs(_psqlGetAll, specification)
 
 	m, err := c.scanRow(c.db.QueryRow(ctx, query, args...))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return model.Customer{}, nil
+	}
 	if err != nil {
 		return model.Customer{}, err
 	}

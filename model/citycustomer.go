@@ -22,3 +22,12 @@ func (c CityCustomers) GetCityIDs() []uint {
 	}
 	return ids
 }
+
+func (c CityCustomers) MakeMapByCustomerId() map[uint]CityCustomer {
+	m := make(map[uint]CityCustomer)
+	for _, cityCustomer := range c {
+		m[cityCustomer.CustomerID] = cityCustomer
+	}
+
+	return m
+}

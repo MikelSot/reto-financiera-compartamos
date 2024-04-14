@@ -1,6 +1,8 @@
 package customerrelation
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/MikelSot/reto-financiera-compartamos/domain/customerrelation"
@@ -77,6 +79,9 @@ func (h handler) Delete(c *gin.Context) {
 
 		return
 	}
+
+	fmt.Println("cityID", cityID)
+	fmt.Println("ID", ID)
 
 	if err := h.useCase.Delete(uint(ID), uint(cityID)); err != nil {
 		c.JSON(h.response.Error(c, "useCase.Delete()", err))

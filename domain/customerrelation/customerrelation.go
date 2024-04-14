@@ -11,7 +11,7 @@ type UseCase interface {
 }
 
 type CustomerUseCase interface {
-	Create(m model.Customer) error
+	Create(m *model.Customer) error
 	Update(m model.Customer) error
 	CreateDelete(ID uint) error
 	Delete(ID uint) error

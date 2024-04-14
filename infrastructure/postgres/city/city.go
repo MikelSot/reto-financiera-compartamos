@@ -3,6 +3,7 @@ package city
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/MikelSot/repository"
 	"github.com/jackc/pgx/v5"
@@ -94,6 +95,9 @@ func (c City) GetWhere(specification repository.FieldsSpecification) (model.City
 	query, args := repository.BuildQueryAndArgs(_psqlGetAll, specification)
 
 	m, err := c.scanRow(c.db.QueryRow(ctx, query, args...))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return model.City{}, nil
+	}
 	if err != nil {
 		return model.City{}, err
 	}

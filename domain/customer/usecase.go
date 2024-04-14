@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"time"
 
 	"github.com/MikelSot/repository"
 
@@ -26,13 +25,17 @@ func New(s Storage) Customer {
 	return Customer{s}
 }
 
-func (c Customer) Create(m model.Customer) error {
+func (c Customer) Create(m *model.Customer) error {
 	if err := model.ValidateStructNil(m); err != nil {
 		return fmt.Errorf("customer: %w", err)
 	}
 
-	err := c.validateRequest(m)
+	err := c.validateRequest(*m)
 	if err != nil {
+		return err
+	}
+
+	if err := c.validateUniqueDni(*m); err != nil {
 		return err
 	}
 
@@ -57,6 +60,18 @@ func (c Customer) Update(m model.Customer) error {
 		return err
 	}
 
+	customer, err := c.GetByID(m.Id)
+	if err != nil {
+		return err
+	}
+
+	if customer.Dni != m.Dni {
+		err = c.validateUniqueDni(m)
+		if err != nil {
+			return err
+		}
+	}
+
 	if err := c.storage.Update(m); err != nil {
 		return c.errorConstraint(err)
 	}
@@ -64,14 +79,21 @@ func (c Customer) Update(m model.Customer) error {
 	return nil
 }
 
+func (c Customer) updateDeletedAt(Id uint) error {
+	if err := c.storage.UpdateDeletedAt(Id); err != nil {
+		return c.errorConstraint(err)
+	}
+
+	return nil
+}
+
 func (c Customer) CreateDelete(ID uint) error {
-	customer, err := c.validateDelete(ID)
+	err := c.validateDelete(ID)
 	if err != nil {
 		return err
 	}
-	customer.DeletedAt = time.Now()
 
-	if err := c.Update(customer); err != nil {
+	if err := c.updateDeletedAt(ID); err != nil {
 		return err
 	}
 
@@ -79,7 +101,7 @@ func (c Customer) CreateDelete(ID uint) error {
 }
 
 func (c Customer) Delete(ID uint) error {
-	_, err := c.validateDelete(ID)
+	err := c.validateDelete(ID)
 	if err != nil {
 		return err
 	}
@@ -126,7 +148,6 @@ func (c Customer) GetAll() (model.Customers, error) {
 }
 
 func (c Customer) validateRequest(m model.Customer) error {
-
 	if err := c.validateDni(m.Dni); err != nil {
 		return err
 	}
@@ -139,25 +160,7 @@ func (c Customer) validateRequest(m model.Customer) error {
 			Issue:       model.IssueViolatedValidation,
 			Description: fmt.Sprintf("birth_date: %s invalid", m.BirthDate),
 		})
-		customErr.SetAPIMessage("¡Upps! Error el cliente debe ser mayor de edad")
-
-		return customErr
-	}
-
-	customer, err := c.getByDni(m.Dni)
-	if err != nil {
-		return err
-	}
-
-	if customer.HasID() {
-		customErr := model.NewError()
-		customErr.SetStatusHTTP(http.StatusUnprocessableEntity)
-		customErr.Fields.Add(model.ErrorDetail{
-			Field:       "dni",
-			Issue:       model.IssueViolatedValidation,
-			Description: fmt.Sprintf("dni: %s invalid", m.BirthDate),
-		})
-		customErr.SetAPIMessage("¡Upps! Error el dni ya existe")
+		customErr.SetAPIMessage(fmt.Sprintf("¡Upps! Error el cliente debe ser mayor de %d años", _minimumAge))
 
 		return customErr
 	}
@@ -196,10 +199,10 @@ func (c Customer) validateDni(dni string) error {
 	return nil
 }
 
-func (c Customer) validateDelete(ID uint) (model.Customer, error) {
+func (c Customer) validateDelete(ID uint) error {
 	customer, err := c.GetByID(ID)
 	if err != nil {
-		return model.Customer{}, err
+		return err
 	}
 
 	if customer.GetAge() <= _maximumAge {
@@ -212,10 +215,37 @@ func (c Customer) validateDelete(ID uint) (model.Customer, error) {
 		})
 		customErr.SetAPIMessage(fmt.Sprintf("¡Upps! Error el cliente debe ser mayor de %d años", _maximumAge))
 
-		return model.Customer{}, customErr
+		return customErr
 	}
 
-	return customer, nil
+	return nil
+}
+
+func (c Customer) validateUniqueDni(customer model.Customer) error {
+	otherCustomer, err := c.getByDni(customer.Dni)
+	if err != nil {
+		return err
+	}
+
+	customErr := model.NewError()
+	customErr.SetStatusHTTP(http.StatusUnprocessableEntity)
+	customErr.Fields.Add(model.ErrorDetail{
+		Field:       "dni",
+		Issue:       model.IssueViolatedValidation,
+		Description: fmt.Sprintf("dni: %s invalid", customer.Dni),
+	})
+	customErr.SetAPIMessage("¡Upps! Error el dni ya existe")
+
+	// We validate that the user who has the ID I want to use is not the same
+	if customer.HasID() && otherCustomer.HasID() && customer.Id != otherCustomer.Id {
+		return customErr
+	}
+
+	if otherCustomer.HasID() {
+		return customErr
+	}
+
+	return nil
 }
 
 func (c Customer) errorConstraint(err error) error {
