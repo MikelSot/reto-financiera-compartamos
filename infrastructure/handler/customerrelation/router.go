@@ -43,5 +43,6 @@ func routes(api *gin.Engine, h handler, middlewares ...gin.HandlerFunc) {
 	routes.PUT("/:id", h.Update)
 	routes.DELETE("/customers/:id/cities/:city-id", h.Delete)
 
+	routes.GET("customers/:id", h.GetByCustomerID)
 	routes.GET("/customers", h.GetAllCustomers)
 }

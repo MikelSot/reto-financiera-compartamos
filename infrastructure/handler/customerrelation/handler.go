@@ -101,3 +101,21 @@ func (h handler) GetAllCustomers(c *gin.Context) {
 
 	c.JSON(h.response.OK(ms))
 }
+
+func (h handler) GetByCustomerID(c *gin.Context) {
+	ID, err := request.ExtractIDFromURLParam(c)
+	if err != nil {
+		c.JSON(h.response.BindFailed(c, err))
+
+		return
+	}
+
+	m, err := h.useCase.GetCustomerById(uint(ID))
+	if err != nil {
+		c.JSON(h.response.Error(c, "useCase.GetByID()", err))
+
+		return
+	}
+
+	c.JSON(h.response.OK(m))
+}
