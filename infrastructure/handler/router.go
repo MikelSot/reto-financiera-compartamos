@@ -1,8 +1,11 @@
 package handler
 
-import "github.com/MikelSot/reto-financiera-compartamos/model"
+import (
+	"github.com/MikelSot/reto-financiera-compartamos/infrastructure/handler/customerrelation"
+	"github.com/MikelSot/reto-financiera-compartamos/model"
+)
 
 func InitRoutes(spec model.RouterSpecification) {
-	// A
-
+	// C
+	customerrelation.NewRouter(spec)
 }
