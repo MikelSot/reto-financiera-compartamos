@@ -7,6 +7,7 @@ type UseCase interface {
 	Update(m model.CustomerRelation) error
 	Delete(customerID, cityID uint) error
 
+	GetCustomerById(id uint) (model.CustomerRelation, error)
 	GetAllCustomers() (model.CustomerRelations, error)
 }
 
@@ -16,6 +17,7 @@ type CustomerUseCase interface {
 	CreateDelete(ID uint) error
 	Delete(ID uint) error
 
+	GetByID(ID uint) (model.Customer, error)
 	GetAll() (model.Customers, error)
 }
 

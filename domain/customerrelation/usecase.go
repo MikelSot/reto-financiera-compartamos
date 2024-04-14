@@ -132,6 +132,29 @@ func (c CustomerRelation) Delete(customerID uint, cityID uint) error {
 	return nil
 }
 
+func (c CustomerRelation) GetCustomerById(id uint) (model.CustomerRelation, error) {
+	customer, err := c.customer.GetByID(id)
+	if err != nil {
+		return model.CustomerRelation{}, fmt.Errorf("customerrelation: %w", err)
+	}
+
+	cityCustomer, err := c.cityCustomer.GetAllByCustomerIDs([]uint{id})
+	if err != nil {
+		return model.CustomerRelation{}, fmt.Errorf("customerrelation: %w", err)
+	}
+
+	city, err := c.city.GetByID(cityCustomer[0].CityID)
+	if err != nil {
+		return model.CustomerRelation{}, fmt.Errorf("customerrelation: %w", err)
+	}
+
+	return model.CustomerRelation{
+		Customer: customer,
+		City:     city,
+	}, nil
+
+}
+
 func (c CustomerRelation) GetAllCustomers() (model.CustomerRelations, error) {
 	customers, err := c.customer.GetAll()
 	if err != nil {
