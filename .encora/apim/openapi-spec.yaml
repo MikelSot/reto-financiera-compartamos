@@ -5,7 +5,7 @@ info:
   version: 1.0.0
   x-audience: internal
 servers:
-  - url: http://cia-adhoc-alicorp-documentoselectronicos.edocs.dev.knative.api-alicorp.com/alicorp/documentos-electronicos
+  - url: https://reto-financiera-compartamos.onrender.com/api/v1
 paths:
   /compartamos:
     post:
@@ -37,6 +37,8 @@ paths:
   /compartamos/{id}:
     put:
       operationId: update
+      tags:
+        - encora
       summary: Actualizar informacion del cliente.
       description: Permite la actualizacion de los datos del cliente
       parameters:
@@ -96,6 +98,8 @@ paths:
   /compartamos/customers/{id}:
     get:
       operationId: GetByCustomerID
+      tags:
+        - encora
       summary: Obtiene un cliente por ID.
       description: Permite obtener la informacion del cliente en especifico
       parameters:
@@ -115,6 +119,8 @@ paths:
   /compartamos/customers:
     get:
       operationId: GetAllCustomers
+      tags:
+        - encora
       summary: Optiene todos los clientes.
       description: Permite obtener la informacion de todos los clientes que no tengan el campo deleted_at con valor
       responses:
@@ -150,32 +156,36 @@ components:
                   type: string
                   example: '12345678'
                 birth_date:
-                  type: date
+                  type: string
                   example: '2003-04-13T00:00:00Z'
+                  description: campo de de tipo fecha
                 gender:
                   type: string
                   example: 'M'
                 email:
-                    type: string
-                    example: 'miguel@soto.com'
+                  type: string
+                  example: 'miguel@soto.com'
                 is_staff:
-                    type: boolean
-                    example: false
+                  type: boolean
+                  example: false
                 picture:
-                    type: string
-                    example: 'https://www.google.com'
+                  type: string
+                  example: 'https://www.google.com'
                 nickname:
-                    type: string
-                    example: 'miguelito'
+                  type: string
+                  example: 'miguelito'
                 created_at:
-                    type: date
-                    example: '2022-10-13T00:00:00Z'
+                  type: string
+                  example: '2022-10-13T00:00:00Z'
+                  description: campo de de tipo date
                 updated_at:
-                    type: date
-                    example: '0001-01-01T00:00:00Z'
+                  type: string
+                  example: '0001-01-01T00:00:00Z'
+                  description: campo de de tipo date
                 deleted_at:
-                    type: date
-                    example: '0001-01-01T00:00:00Z'
+                  type: string
+                  example: '0001-01-01T00:00:00Z'
+                  description: campo de de tipo date
             city:
               type: object
               properties:
@@ -186,14 +196,17 @@ components:
                   type: string
                   example: 'Lima'
                 created_at:
-                  type: date
+                  type: string
                   example: '0001-01-01T00:00:00Z'
+                  description: campo de de tipo date
                 updated_at:
-                  type: date
+                  type: string
                   example: '0001-01-01T00:00:00Z'
+                  description: campo de de tipo date
                 deleted_at:
-                  type: date
+                  type: string
                   example: '0001-01-01T00:00:00Z'
+                  description: campo de de tipo date
         messages:
           type: array
           items:
@@ -271,9 +284,9 @@ components:
               example: '12345678'
               description: DNI del cliente.
             birth_date:
-              type: date
+              type: string
               example: '2003-04-13T00:00:00Z'
-              description: fecha de nacimiento del cliente.
+              description: fecha de nacimiento del cliente, tipo date.
             gender:
               type: string
               example: 'M'
@@ -334,8 +347,9 @@ components:
               type: string
               example: '12345678'
             birth_date:
-              type: date
+              type: string
               example: '2003-04-13T00:00:00Z'
+              description: campo de de tipo date
             gender:
               type: string
               example: 'M'
@@ -352,14 +366,17 @@ components:
               type: string
               example: 'miguelito'
             created_at:
-              type: date
+              type: string
               example: '2022-10-13T00:00:00Z'
+              description: campo de de tipo date
             updated_at:
-              type: date
+              type: string
               example: '0001-01-01T00:00:00Z'
+              description: campo de de tipo date
             deleted_at:
-              type: date
+              type: string
               example: '0001-01-01T00:00:00Z'
+              description: campo de de tipo date
         city:
           type: object
           properties:
@@ -370,11 +387,14 @@ components:
               type: string
               example: 'Lima'
             created_at:
-              type: date
+              type: string
               example: '0001-01-01T00:00:00Z'
+              description: campo de de tipo date
             updated_at:
-              type: date
+              type: string
               example: '0001-01-01T00:00:00Z'
+              description: campo de de tipo date
             deleted_at:
-              type: date
+              type: string
               example: '0001-01-01T00:00:00Z'
+              description: campo de de tipo date
